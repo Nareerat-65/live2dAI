@@ -47,7 +47,10 @@
 
 <body onload="sampleApp1()">
   <p><button id="btnChange" class="active">Change Model</button></p>
-  <button id="testLipSync">ทดสอบ Lip-Sync</button>
+  <button id="testIntroduce">ทดสอบ Introduce</button>
+  <button id="testAnnounceBid">ทดสอบ AnnounceBid</button>
+  <button id="testPrompt">ทดสอบ Prompt</button>
+  <button id="testWinner">ทดสอบ Winner</button>
   <div>
     <canvas id="glcanvas" width="680" height="940" style="border:dashed 1px #CCC"></canvas>
   </div>
@@ -71,12 +74,34 @@
     import { AuctionAI } from './src/ai.js';
 
     // หลัง Live2D โหลดเสร็จ
+    await sampleApp1();
     const model = live2DMgr.getModel(0);
     const auctionAI = new AuctionAI(model);
 
     // ตัวอย่างปุ่มทดสอบ Lip-Sync
-    document.getElementById('testLipSync')
-      .addEventListener('click', () => auctionAI.speak('prompt', []));
+    document.getElementById('testIntroduce')
+      .addEventListener('click', () => {
+        auctionAI.speak('introduce', [{
+          name: 'นาฬิกาโบราณ',
+          desc: 'สภาพดีมาก',
+          startPrice: 500
+        }]);
+      });
+
+    document.getElementById('testAnnounceBid')
+      .addEventListener('click', () => {
+        auctionAI.speak('announceBid', ['สมชาย', 600]);
+      });
+
+    document.getElementById('testPrompt')
+      .addEventListener('click', () => {
+        auctionAI.speak('prompt', []);
+      });
+
+    document.getElementById('testWinner')
+      .addEventListener('click', () => {
+        auctionAI.speak('announceWinner', ['สมหญิง', 1200]);
+      });
   </script>
 
 </body>

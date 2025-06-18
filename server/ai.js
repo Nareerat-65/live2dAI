@@ -1,12 +1,7 @@
 // server/ai.js
-require('dotenv').config();            // โหลด .env
-const { callGemini, callTTS } = require('./aiClient');
-
+require('dotenv').config();
 const express = require('express');
-const router = express.Router();
-
-// นำเข้า wrapper สำหรับเรียก Gemini และ TTS
-// ปรับ path ให้ตรงกับตำแหน่งไฟล์ของคุณ
+const router  = express.Router();
 const { callGemini, callTTS } = require('./aiClient');
 
 // Prompt templates สำหรับแต่ละเหตุการณ์ประมูล

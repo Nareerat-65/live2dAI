@@ -5,7 +5,7 @@ const express = require('express');
 const path    = require('path');
 
 // นำเข้า AI‐router (ไฟล์ server/ai.js)
-const aiRouter = require('./server/ai');
+const aiRouter = require('./ai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

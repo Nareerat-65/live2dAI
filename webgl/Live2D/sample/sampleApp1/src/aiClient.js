@@ -1,40 +1,35 @@
-// src/ai.js
-require('dotenv').config();
-
 // aiClient.js
+require('dotenv').config();
 const axios = require('axios');
+const AWS   = require('aws-sdk');
 
+// Gemini (เหมือนเดิม)
 async function callGemini(prompt) {
-    const res = await axios.post(
-        'https://api.palm.googleapis.com/v1/models/gemini:generateText',
-        { prompt },
-        {
-            headers: {
-                Authorization: `Bearer ${process.env.GEMINI_API_KEY}`
-            }
-        }
-    );
-    return res.data.candidates[0].content;
+  const res = await axios.post(
+    'https://api.palm.googleapis.com/v1/models/gemini:generateText',
+    { prompt },
+    { headers: { Authorization: `Bearer ${process.env.GEMINI_API_KEY}` } }
+  );
+  return res.data.candidates[0].content;
 }
 
+// AWS Polly
+AWS.config.update({ region: process.env.AWS_REGION });
+const polly = new AWS.Polly();
 async function callTTS(text) {
-    const res = await axios.post(
-        'https://texttospeech.googleapis.com/v1/text:synthesize',
-        {
-            input: { text },
-            voice: { languageCode: 'th-TH', ssmlGender: 'NEUTRAL' },
-            audioConfig: { audioEncoding: 'MP3' }
-        },
-        {
-            headers: {
-                Authorization: `Bearer ${process.env.TTS_API_KEY}`
-            }
-        }
-    );
-    return res.data.audioContent;
+  const params = {
+    OutputFormat: 'mp3',
+    Text: text,
+    VoiceId: 'Cholada',      // หรือ 'Chulabhorn'
+    LanguageCode: 'th-TH'
+  };
+  const { AudioStream } = await polly.synthesizeSpeech(params).promise();
+  // แปลง Buffer เป็น base64 string
+  return AudioStream.toString('base64');
 }
 
 module.exports = { callGemini, callTTS };
+
 
 
 export class AuctionAI {
