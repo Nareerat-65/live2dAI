@@ -3,8 +3,6 @@ require('dotenv').config();
 
 const express = require('express');
 const path    = require('path');
-
-// นำเข้า AI‐router (ไฟล์ server/ai.js)
 const aiRouter = require('./ai');
 
 const app = express();
@@ -19,10 +17,17 @@ app.use('/api', aiRouter);
 
 // 3) (ถ้าต้องการให้ Express เสิร์ฟหน้าเว็บและ assets)  
 //    ปรับ path ให้ตรงกับโฟลเดอร์ที่เก็บ SampleApp1.html, SampleApp1.js, และ src/ai.js  
-app.use('/', express.static(path.join(__dirname, 'webgl/Live2D/sample/sampleApp1')));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'webgl/Live2D/sample/sampleApp1/SampleApp1.html'));
-});
+// server.js (ตรงส่วน static)
+const sampleApp = path.join(__dirname, '..', 'webgl', 'Live2D', 'sample', 'sampleApp1');
+
+// บอก static ให้ index เป็นไฟล์ SampleApp1.html
+app.use(
+  '/',
+  express.static(sampleApp, { index: 'SampleApp1.html' })
+);
+
+// เอา catch-all ออกไปก็ได้ เพราะ static จัดการ index ให้แล้ว
+
 
 // เริ่มรัน server
 app.listen(PORT, () => {
