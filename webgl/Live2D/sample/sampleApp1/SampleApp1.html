@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Live2D SampleApp1</title>
+  <meta name="viewport" content="width=device-width, initial-scale=0.5, minimum-scale=1.0, maximum-scale=4.0">
+  <style>
+    html,
+    body {
+      overflow: hidden;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #glcanvas {
+      background-size: 150%;
+      background-position: 50% 50%;
+      background-image: url(assets/image/back_class_normal.png);
+    }
+
+    button {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.5), inset 0 0 1px rgba(255, 255, 255, 0.7);
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    button.active {
+      background: linear-gradient(to bottom, #3498db, #2980b9);
+      border: 1px solid #2980b9;
+    }
+
+    button.inactive {
+      background: linear-gradient(to bottom, #e74c3c, #c0392b);
+      border: 1px solid #c0392b;
+    }
+  </style>
+</head>
+
+<body onload="sampleApp1()">
+  <p><button id="btnChange" class="active">Change Model</button></p>
+  <button id="testLipSync">ทดสอบ Lip-Sync</button>
+  <div>
+    <canvas id="glcanvas" width="680" height="940" style="border:dashed 1px #CCC"></canvas>
+  </div>
+  <div id="myconsole" style="color:#000">---- Log ----</div>
+
+  <!-- Live2D Library -->
+  <script src="../../lib/live2d.min.js"></script>
+  <script src="../../framework/Live2DFramework.js"></script>
+
+  <!-- Live2D App Scripts -->
+  <script src="src/utils/MatrixStack.js"></script>
+  <script src="src/utils/ModelSettingJson.js"></script>
+  <script src="src/PlatformManager.js"></script>
+  <script src="src/LAppDefine.js"></script>
+  <script src="src/LAppModel.js"></script>
+  <script src="src/LAppLive2DManager.js"></script>
+  <script src="src/SampleApp1.js"></script>
+
+  <!-- AI Auctioneer Script -->
+  <script type="module">
+    import { AuctionAI } from './src/ai.js';
+
+    // หลัง Live2D โหลดเสร็จ
+    const model = live2DMgr.getModel(0);
+    const auctionAI = new AuctionAI(model);
+
+    // ตัวอย่างปุ่มทดสอบ Lip-Sync
+    document.getElementById('testLipSync')
+      .addEventListener('click', () => auctionAI.speak('prompt', []));
+  </script>
+
+</body>
+
+</html>
