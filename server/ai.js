@@ -1,4 +1,7 @@
 // server/ai.js
+require('dotenv').config();            // โหลด .env
+const { callGemini, callTTS } = require('./aiClient');
+
 const express = require('express');
 const router = express.Router();
 
