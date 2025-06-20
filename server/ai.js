@@ -1,8 +1,8 @@
 // server/ai.js
 require('dotenv').config();
 const express = require('express');
-const router  = express.Router();
-const { callGemini, callTTS } = require('./aiClient');
+const router = express.Router();
+const { callGroq, callTTS } = require('./aiClient');
 
 // Prompt templates สำหรับแต่ละเหตุการณ์ประมูล
 const TEMPLATES = {
@@ -18,26 +18,27 @@ const TEMPLATES = {
 
 // POST /api/ai
 router.post('/ai', async (req, res) => {
-  const { type, data } = req.body;
-
-  // เช็คว่า type ถูกต้อง
-  if (!TEMPLATES[type]) {
-    return res.status(400).json({ error: 'Unknown AI type' });
-  }
-
-  // สร้าง prompt จาก template และ data
-  const prompt = TEMPLATES[type](...(data || []));
-
   try {
-    // เรียก Gemini เพื่อ generate text script
-    const script = await callGemini(prompt);
-    // เรียก TTS เพื่อสังเคราะห์เสียงเป็น base64
+    const { type, data } = req.body;
+
+    if (!TEMPLATES[type]) {
+      return res.status(400).json({ error: 'Unknown type' });
+    }
+
+    const prompt = TEMPLATES[type](...(data || []));
+    console.log('[AI] Prompt:', prompt);
+
+    const script = await callGroq(prompt);
+    console.log('[AI] Groq script:', script);
+
     const audioBase64 = await callTTS(script);
-    // ส่งกลับไปให้ไคลเอ็นต์
-    res.json({ text: script, audioBase64 });
+    console.log('[AI] Audio length:', audioBase64.length);
+
+    return res.json({ text: script, audioBase64 });
+
   } catch (err) {
-    console.error('AI service error:', err);
-    res.status(500).json({ error: 'AI service failed' });
+    console.error('[AI] Error:', err);  // <<< สำคัญ
+    return res.status(500).json({ error: 'AI service failed' });
   }
 });
 

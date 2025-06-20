@@ -43,28 +43,57 @@ export class AuctionAI {
      * @param {string} audioBase64 - data URI ของไฟล์เสียง (MP3/PCM)
      */
     async _playAndLipSync(audioBase64) {
-        const audio = new Audio(audioBase64);
+        const dataUri = "data:audio/mp3;base64," + audioBase64;
+        await this.audioCtx.resume();
+
+        const audio = new Audio(dataUri);
+        audio.volume = 1;
+
         const src = this.audioCtx.createMediaElementSource(audio);
+        src.connect(this.audioCtx.destination);
         src.connect(this.analyser);
         this.analyser.connect(this.audioCtx.destination);
-        audio.play();
+
+        if (this.model._motionManager) {
+            this.model._motionManager.stopAllMotions();
+        }
+
+        try {
+            await audio.play();
+            console.log("✅ Audio is playing!");
+        } catch (err) {
+            console.error("❌ Audio play error:", err);
+        }
 
         return new Promise(resolve => {
-            audio.addEventListener('ended', resolve);
+            const scale = 2.0;
 
             const update = () => {
                 this.analyser.getByteTimeDomainData(this.dataArray);
-                // คำนวณ RMS ของ waveform
                 let sum = 0;
                 for (let v of this.dataArray) {
                     const x = (v - 128) / 128;
                     sum += x * x;
                 }
-                this.lipSyncValue = Math.sqrt(sum / this.dataArray.length) * 2;
-                // เขียนค่า lipSync เข้า parameter ปาก
+
+                this.lipSyncValue = Math.sqrt(sum / this.dataArray.length) * scale;
+
                 this.model.live2DModel.setParamFloat("PARAM_MOUTH_OPEN_Y", this.lipSyncValue);
-                if (!audio.paused) requestAnimationFrame(update);
+                this.model.live2DModel.update(); // ✅ สำคัญ
+                this.model.live2DModel.draw();   // ✅ สำคัญ
+
+                if (!audio.paused) {
+                    requestAnimationFrame(update);
+                }
             };
+
+            audio.addEventListener("ended", () => {
+                this.model.live2DModel.setParamFloat("PARAM_MOUTH_OPEN_Y", 0);
+                this.model.live2DModel.update();
+                this.model.live2DModel.draw(); // ✅ reset หน้าจอ
+                resolve();
+            });
+
 
             update();
         });

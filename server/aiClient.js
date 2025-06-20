@@ -1,30 +1,56 @@
-require('dotenv').config();
-const axios = require('axios');
-const AWS   = require('aws-sdk');
+const axios = require("axios");
+const AWS = require("aws-sdk");
+require("dotenv").config();
 
-// Gemini (เหมือนเดิม)
-async function callGemini(prompt) {
-  const res = await axios.post(
-    'https://api.palm.googleapis.com/v1/models/gemini:generateText',
-    { prompt },
-    { headers: { Authorization: `Bearer ${process.env.GEMINI_API_KEY}` } }
-  );
-  return res.data.candidates[0].content;
+// ✅ LOG
+console.log('GROQ Key:', process.env.GROQ_API_KEY);
+
+// ✅ เช็ค Key
+if (!process.env.GROQ_API_KEY) {
+  throw new Error('❌ GROQ_API_KEY not found in environment variables');
 }
 
-// AWS Polly
-AWS.config.update({ region: process.env.AWS_REGION });
+// 🔹 ใช้ Groq API (แทน Gemini)
+async function callGroq(prompt) {
+  const response = await axios.post(
+    "https://api.groq.com/openai/v1/chat/completions",
+    {
+      model: "llama3-8b-8192", // ✅ หรือใช้ mixtral ก็ได้
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json"
+      }
+    }
+  );
+  return response.data.choices[0].message.content;
+}
+
+// 🔸 AWS Polly (Thai TTS)
+AWS.config.update({
+  region: process.env.AWS_REGION,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
 const polly = new AWS.Polly();
+
 async function callTTS(text) {
+  console.log("📏 TTS: Character count =", text.length); 
+  console.log("🔊 TTS: Content preview =", text.slice(0, 100));
+
   const params = {
     OutputFormat: 'mp3',
     Text: text,
-    VoiceId: 'Cholada',      // หรือ 'Chulabhorn'
-    LanguageCode: 'th-TH'
+    VoiceId: 'Salli', // ✅ ใช้เสียงหญิง English
+  LanguageCode: 'en-US'
   };
   const { AudioStream } = await polly.synthesizeSpeech(params).promise();
-  // แปลง Buffer เป็น base64 string
   return AudioStream.toString('base64');
 }
 
-module.exports = { callGemini, callTTS };
+// ✅ ส่งออกฟังก์ชัน
+module.exports = { callGroq, callTTS };
