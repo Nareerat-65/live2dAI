@@ -279,8 +279,7 @@ LAppModel.prototype.update = function()
     
     if (this.lipSync == null)
     {
-        this.live2DModel.setParamFloat("PARAM_MOUTH_OPEN_Y",
-                                       this.lipSyncValue);
+        this.live2DModel.setParamFloat("PARAM_MOUTH_OPEN_Y",this.lipSyncValue);
     }
     
     

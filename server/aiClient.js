@@ -16,7 +16,7 @@ async function callGroq(prompt) {
     "https://api.groq.com/openai/v1/chat/completions",
     {
       model: "llama3-8b-8192", // ✅ หรือใช้ mixtral ก็ได้
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "system", content: prompt }],
       temperature: 0.7
     },
     {
