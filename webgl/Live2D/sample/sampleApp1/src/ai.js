@@ -28,9 +28,16 @@ export class AuctionAI {
 
       const { text, audioBase64 } = await res.json();
       console.log('[AI] 🗣️ Text:', text);
+      console.log('[DEBUG] Audio length (Base64):', audioBase64.length);
 
-      // สร้าง audio object
+      await this.audioCtx.resume(); // 🔓 ปลดล็อก autoplay บาง browser
+
       const audio = new Audio("data:audio/mp3;base64," + audioBase64);
+
+      // DEBUG: ตรวจสอบว่าเล่นเสียงได้ไหม
+      audio.onplay = () => console.log('[DEBUG] Audio is playing...');
+      audio.onerror = e => console.error('[DEBUG] Audio error:', e);
+
       audio.play();
 
       // เชื่อมเสียงกับ analyzer
@@ -49,6 +56,8 @@ export class AuctionAI {
         }
 
         this.lipSyncValue = Math.sqrt(sum / this.dataArray.length);
+
+        console.log('[DEBUG] lipSyncValue:', this.lipSyncValue)
 
         if (!audio.paused && !audio.ended) {
           requestAnimationFrame(updateLipSync);

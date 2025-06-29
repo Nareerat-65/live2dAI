@@ -69,11 +69,10 @@
   <script src="src/LAppLive2DManager.js"></script>
   <script src="src/SampleApp1.js"></script>
 
-  <!-- AI Auctioneer Script -->
+  <!-- AI Auctioneer -->
   <script type="module">
     import { AuctionAI } from './src/ai.js';
 
-    // รอให้ Live2D โหลดเสร็จ
     const waitForLive2D = async () => {
       return new Promise(resolve => {
         const check = setInterval(() => {
@@ -86,10 +85,24 @@
     };
 
     const model = await waitForLive2D();
-    const auctionAI = new AuctionAI(model);
-    window.auctionAI = auctionAI; // ให้ access จาก global เพื่อให้ SampleApp1.js ใช้ได้
 
-    // ทดสอบปุ่มต่าง ๆ
+    // 🔧 ปิดระบบ lipSync ของ Live2D (กันการรีเซ็ตจาก motion)
+    model.lipSync = null;
+
+    const auctionAI = new AuctionAI(model);
+    window.auctionAI = auctionAI;
+
+    // 🔁 อัปเดตค่าปากทุกเฟรม
+    const updateMouth = () => {
+      const model = live2DMgr.getModel(0);
+      if (model && model.live2DModel && auctionAI && typeof auctionAI.lipSyncValue !== 'undefined') {
+        model.live2DModel.setParamFloat("ParamMouthOpenY", auctionAI.lipSyncValue, true);
+      }
+      requestAnimationFrame(updateMouth);
+    };
+    updateMouth();
+
+    // ปุ่มทดสอบคำพูด
     document.getElementById('testIntroduce').addEventListener('click', () => {
       auctionAI.speak('introduce', [{
         name: 'นาฬิกาโบราณ',
@@ -111,25 +124,5 @@
     });
   </script>
 
-  <!-- เพิ่มสคริปต์ดัก Param ปากทุกเฟรม -->
-  <script>
-    const originalDraw = window.draw;
-    window.draw = function () {
-      if (typeof auctionAI !== 'undefined' && auctionAI.lipSyncValue !== undefined) {
-        for (let i = 0; i < live2DMgr.numModels(); i++) {
-          const model = live2DMgr.getModel(i);
-          if (model && model.live2DModel) {
-            model.live2DModel.setParamFloat("PARAM_MOUTH_OPEN_Y", auctionAI.lipSyncValue);
-          }
-        }
-      }
-
-      if (typeof originalDraw === "function") {
-        originalDraw(); // เรียก draw ดั้งเดิม
-      }
-    };
-  </script>
-
 </body>
-
 </html>

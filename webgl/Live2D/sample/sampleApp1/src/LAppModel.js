@@ -208,11 +208,11 @@ LAppModel.prototype.update = function()
     var t = timeSec * 2 * Math.PI; 
     
     
-    if (this.mainMotionManager.isFinished())
-    {
+    // if (this.mainMotionManager.isFinished())
+    // {
         
-        this.startRandomMotion(LAppDefine.MOTION_GROUP_IDLE, LAppDefine.PRIORITY_IDLE);
-    }
+    //     this.startRandomMotion(LAppDefine.MOTION_GROUP_IDLE, LAppDefine.PRIORITY_IDLE);
+    // }
     
     //-----------------------------------------------------------------		
     
@@ -279,7 +279,7 @@ LAppModel.prototype.update = function()
     
     if (this.lipSync == null)
     {
-        this.live2DModel.setParamFloat("PARAM_MOUTH_OPEN_Y",this.lipSyncValue);
+        this.live2DModel.setParamFloat("ParamMouthOpenY",this.lipSyncValue);
     }
     
     
